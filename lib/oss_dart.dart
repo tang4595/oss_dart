@@ -163,7 +163,7 @@ class OssClient {
   //@param exp url有效期
   getUrl(String fileKey, {int exp = 3600}) async {
     await init();
-    headers['date'] = (DateTime.now().millisecondsSinceEpoch + exp).toString();
+    headers['x-oss-date'] = (DateTime.now().millisecondsSinceEpoch + exp).toString();
     this.method = 'GET';
     this.fileKey = fileKey;
     bool hasSymbol = fileKey.indexOf("?") >= 0;
@@ -171,7 +171,7 @@ class OssClient {
     params["security-token"] = this.secureToken;
     String signature = this._makeSignature();
     return "${this.bucketName}.${this.endpoint}/$fileKey${(hasSymbol ? '&' : "?")}"
-        "Expires=${headers['date']}&OSSAccessKeyId=${this.accessKey}&Signature=${Uri.encodeQueryComponent(signature)}"
+        "Expires=${headers['x-oss-date']}&OSSAccessKeyId=${this.accessKey}&Signature=${Uri.encodeQueryComponent(signature)}"
         "&security-token=${Uri.encodeQueryComponent(this.secureToken)}";
   }
 
@@ -224,7 +224,7 @@ class OssClient {
   //签名url
   void _signRequest() {
     this.url = "https://$bucketName.$endpoint/$fileKey";
-    headers['date'] = httpDateNow();
+    headers['x-oss-date'] = httpDateNow();
     if (this.secureToken != null) {
       headers['x-oss-security-token'] = this.secureToken;
     }
@@ -242,7 +242,7 @@ class OssClient {
     final headersString = this._getHeadersString();
     final contentMd5 = headers['content-md5'] ?? '';
     final contentType = headers['content-type'] ?? '';
-    final date = headers['date'];
+    final date = headers['x-oss-date'];
     return "$method\n$contentMd5\n$contentType\n$date\n$headersString$resourceString";
   }
 
